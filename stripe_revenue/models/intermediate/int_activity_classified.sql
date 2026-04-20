@@ -37,6 +37,7 @@ classified as (
 
         -- Charge and tenant context (null for orphan activity)
         c.charge_amount,
+        c.expected_transfer_amount,
         c.charge_status,
         c.dbtenant_ids,
         c.addon_types,

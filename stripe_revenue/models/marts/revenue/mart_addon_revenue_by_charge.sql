@@ -1,7 +1,9 @@
 -- Charge-level P&L. One row per Stripe charge with every revenue and cost component as its own column.
 -- gross_charge_amount comes from the charges table (authoritative), not from summing activity events.
--- net_revenue = gross_charge minus all outflows. net_take_rate = what fraction DoorLoop keeps.
--- is_settled turns true only once a connect_transfer event has landed (ch_EEE is still unsettled).
+-- net_revenue = gross_charge minus all outflows that have landed. net_take_rate = what fraction DoorLoop keeps.
+-- On unsettled charges net_revenue equals gross (no outflows yet) — use expected_transfer_amount to project real net.
+-- expected_transfer_amount is set at charge creation time and is used by the monthly model for in-flight projection.
+-- is_settled turns true only once a connect_transfer event has landed.
 -- Orphan activity is excluded — those rows have no charge context to aggregate into.
 with events as (
     select * from {{ ref('mart_addon_revenue_events') }}
@@ -21,6 +23,7 @@ by_charge as (
 
         -- Gross income: authoritative from raw_stripe_charges, not the activity event
         max(charge_amount)                                                          as gross_charge_amount,
+        max(expected_transfer_amount)                                               as expected_transfer_amount,
 
         -- Outflows: all from activity events (transfers, fees, refunds)
         sum(case when event_subtype = 'connect_transfer' then amount else 0 end)   as connect_transfer_amount,
