@@ -1,0 +1,62 @@
+name: stripe_revenue
+version: "1.0.0"
+config-version: 2
+
+profile: stripe_revenue
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+docs-paths: ["docs"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  stripe_revenue:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      revenue:
+        +materialized: table
+        +schema: marts
+
+seeds:
+  stripe_revenue:
+    +schema: raw
+    raw_journal_entries:
+      +column_types:
+        journalentry_id: varchar
+        charge_id: varchar
+        dbtenant_id: varchar
+        addon_type: varchar
+    raw_stripe_charges:
+      +column_types:
+        charge_id: varchar
+        stripe_customer_id: varchar
+        stripe_tenant_customer_id: varchar
+        charge_amount: double
+        charge_status: varchar
+        created_at: timestamp
+        journalentry_id: varchar
+        expected_transfer_amount: double
+    raw_stripe_activity:
+      +column_types:
+        balance_transaction_id: varchar
+        charge_id: varchar
+        event_at: timestamp
+        event_type: varchar
+        event_subtype: varchar
+        amount: double
+        flow_direction: varchar
+        currency: varchar
+        amount_original_currency: double

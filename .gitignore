@@ -1,0 +1,7 @@
+stripe_revenue/stripe_revenue.duckdb
+stripe_revenue/target/
+stripe_revenue/dbt_packages/
+stripe_revenue/logs/
+stripe_revenue/.user.yml
+.DS_Store
+.claude/

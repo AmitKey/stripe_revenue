@@ -1,0 +1,130 @@
+version: 2
+
+# ---------------------------------------------------------------------------
+# Seeds — raw source data loaded as CSV files for local development.
+#
+# These seeds mirror the three raw tables that would be ingested from
+# Stripe Connect and DoorLoop's internal MongoDB in a production environment.
+# In production, replace source() calls with these seed refs, or configure
+# sources in models/staging/_sources.yml to point to the warehouse schema.
+# ---------------------------------------------------------------------------
+
+seeds:
+
+  - name: raw_journal_entries
+    description: >
+      Seed copy of the internal MongoDB collection mapping each Stripe charge
+      to a DoorLoop tenant and addon type.
+      Source in production: MongoDB → ingestion pipeline → raw.raw_journal_entries.
+      KNOWN DATA ISSUE: charge ch_DDD has two rows (je_004 payments, je_005
+      screening) — the charge maps to two different addon types.
+    columns:
+      - name: journalentry_id
+        description: Internal journal entry ID (primary key).
+        tests:
+          - unique
+          - not_null
+      - name: charge_id
+        description: >
+          Stripe charge ID — join key to raw_stripe_charges and
+          raw_stripe_activity. NOT unique in this table (ch_DDD appears twice).
+      - name: dbtenant_id
+        description: Internal DoorLoop tenant identifier.
+        tests:
+          - not_null
+      - name: addon_type
+        description: "Addon product type. Values: payments, screening."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["payments", "screening"]
+
+  - name: raw_stripe_charges
+    description: >
+      Seed copy of one row per Stripe charge.
+      Source in production: Stripe API / Fivetran → raw.raw_stripe_charges.
+      NOTE: expected_transfer_amount is a charge-creation-time estimate.
+      Use connect_transfer events from raw_stripe_activity for accurate amounts.
+    columns:
+      - name: charge_id
+        description: Stripe charge ID (primary key).
+        tests:
+          - unique
+          - not_null
+      - name: stripe_customer_id
+        description: Stripe customer ID at the platform level.
+      - name: stripe_tenant_customer_id
+        description: Stripe customer ID at the Connect / tenant level.
+      - name: charge_amount
+        description: Gross amount collected from the end customer (USD).
+        tests:
+          - not_null
+      - name: charge_status
+        description: Charge lifecycle status (succeeded, failed, pending, etc.).
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["succeeded", "failed", "pending", "refunded", "disputed"]
+      - name: created_at
+        description: Charge creation timestamp.
+        tests:
+          - not_null
+      - name: journalentry_id
+        description: >
+          Journal entry ID set at charge creation time — soft reference only.
+          Not guaranteed to match the final journal entry; join via charge_id
+          where possible.
+      - name: expected_transfer_amount
+        description: >
+          Expected transfer to connected account (charge-creation estimate).
+          Do NOT use for net revenue — use actual transfer events instead.
+
+  - name: raw_stripe_activity
+    description: >
+      Seed copy of every Stripe financial event.
+      Source in production: Stripe Balance Transaction API / Fivetran →
+      raw.raw_stripe_activity.
+      Multiple rows per charge; events arrive at different times.
+      KNOWN DATA ISSUES:
+        - txn_008 (ch_CCC): currency is CAD, amount_original_currency is null
+          (conversion failed — handle before aggregating).
+        - txn_009 (ch_CCC): connect_transfer tagged as inflow instead of
+          outflow — likely a data error; verify before modeling.
+        - txn_014 (ch_FFF): dispute_fee for a charge not in raw_stripe_charges.
+        - txn_015 (ch_GGG): refund for a charge not in raw_stripe_charges.
+    columns:
+      - name: balance_transaction_id
+        description: Unique Stripe balance-transaction ID (primary key).
+        tests:
+          - unique
+          - not_null
+      - name: charge_id
+        description: Stripe charge this event belongs to.
+      - name: event_at
+        description: Exact timestamp of the financial event.
+        tests:
+          - not_null
+      - name: event_type
+        description: "High-level type. Values: charge, fee, transfer, refund, dispute, reversal."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["charge", "fee", "transfer", "refund", "dispute", "reversal"]
+      - name: event_subtype
+        description: >
+          Detailed subtype.
+          Values: charge, processing_fee, interchange, connect_transfer,
+          dispute_fee, refund, reversal.
+      - name: amount
+        description: Event amount in USD (converted from original currency).
+      - name: flow_direction
+        description: "Direction of money flow from platform perspective. Values: inflow, outflow."
+        tests:
+          - accepted_values:
+              values: ["inflow", "outflow"]
+      - name: currency
+        description: Original transaction currency code.
+      - name: amount_original_currency
+        description: >
+          Amount in original currency before USD conversion. Null when
+          conversion failed (see txn_008).

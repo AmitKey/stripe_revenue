@@ -1,0 +1,117 @@
+version: 2
+
+models:
+  - name: mart_addon_revenue_events
+    description: >
+      Enriched event-level table. One row per Stripe balance transaction.
+      Includes all activity, orphan or not. The is_orphan_activity flag is surfaced as a column
+      so consumers can filter themselves if needed.
+    columns:
+      - name: balance_transaction_id
+        tests: [unique, not_null]
+      - name: event_at
+        tests: [not_null]
+      - name: event_month
+        description: Calendar month of the financial event (truncated to month).
+      - name: charge_month
+        description: Calendar month of the original charge. Null for orphan activity.
+      - name: days_since_charge
+        description: Days between the original charge and this event. Null for orphan activity.
+      - name: revenue_category
+        description: >
+          Cleaned label for the financial event: gross_charge, processing_fee,
+          interchange_fee, connect_transfer, dispute_fee, refund, reversal, other.
+
+  - name: mart_addon_revenue_by_charge
+    description: >
+      Charge-level P&L. One row per Stripe charge with every revenue and cost component as its own column.
+      gross_charge_amount comes from the charges table (authoritative), not from summing activity events.
+      net_revenue = gross_charge minus all outflows. net_take_rate = what fraction DoorLoop keeps.
+      is_settled turns true only once a connect_transfer event has landed (ch_EEE is still unsettled).
+      Orphan activity is excluded — those rows have no charge context to aggregate into.
+    columns:
+      - name: charge_id
+        tests: [unique, not_null]
+      - name: gross_charge_amount
+        description: Total inflow from the end customer for this charge.
+      - name: connect_transfer_amount
+        description: Total funds transferred out to the property manager.
+      - name: processing_fee_amount
+        description: Stripe processing fees for this charge.
+      - name: interchange_fee_amount
+        description: Interchange fees for this charge.
+      - name: dispute_fee_amount
+        description: Dispute/chargeback fees, if any.
+      - name: refund_amount
+        description: Total refunded to the end customer.
+      - name: net_revenue
+        description: Net revenue to DoorLoop (gross_charge minus all outflows).
+      - name: net_take_rate
+        description: net_revenue / gross_charge_amount — DoorLoop's retention ratio.
+      - name: is_settled
+        description: True once a connect_transfer event has arrived for this charge.
+      - name: days_to_first_transfer
+        description: Days from charged_at to first connect_transfer event. Null if unsettled.
+      - name: is_original_currency_amount_missing
+        description: True if any event for this charge is a non-USD charge where the original currency amount was not captured (conversion failed).
+      - name: has_multiple_addon_types
+        description: True for ch_DDD (payments + screening on a single charge).
+
+  - name: mart_addon_revenue_monthly
+    description: >
+      Monthly revenue roll-up by addon type. One row per (charge month, addon type).
+      Multi-addon charges (ch_DDD) are included with addon_type = 'payments,screening'.
+      Revenue is real regardless of attribution ambiguity — excluding it would understate income.
+      Groups by charge_month (when income was recognized) not event_month (when fees landed).
+      All orphan activity (dispute fees and refunds) rolls up under addon_type = 'unattributed'
+      so net revenue is never overstated.
+    columns:
+      - name: recognized_month
+        description: Month revenue was recognized. For attributed rows equals charge_month (all charge-linked events use the charge creation date regardless of when they landed). For orphan rows equals the event month (no charge to anchor to).
+      - name: addon_type
+        description: Addon type (payments or screening).
+      - name: charge_count
+        description: Distinct charges with events in this month.
+      - name: gross_charges
+        description: Total gross charge inflows in this month.
+      - name: connect_transfers_out
+        description: Total funds transferred to property managers.
+      - name: processing_fees
+        description: Total Stripe processing fees.
+      - name: interchange_fees
+        description: Total interchange fees.
+      - name: dispute_fees
+        description: Total dispute/chargeback fees.
+      - name: refunds
+        description: Total refunded to end customers.
+      - name: net_revenue
+        description: Net revenue to DoorLoop after all outflows.
+      - name: net_take_rate
+        description: >
+          net_revenue / gross_charges. The fraction DoorLoop retains after
+          paying out property managers and all Stripe fees.
+
+  - name: mart_data_quality_alerts
+    description: >
+      One row per flagged data issue, for Finance review. Covers five alert types:
+      orphan_activity (no matching charge), currency_conversion_failed (txn_008),
+      multi_addon_charge (ch_DDD), missing_journal_entry (charge with no JE),
+      and pending_settlement (ch_EEE — charge collected, no transfer yet).
+      Ordered by severity (warning before info).
+    columns:
+      - name: alert_type
+        description: >
+          Category of issue: orphan_activity, currency_conversion_failed,
+          multi_addon_charge, missing_journal_entry, pending_settlement.
+      - name: severity
+        description: warning (requires investigation) or info (monitor, low urgency).
+      - name: balance_transaction_id
+        description: Populated for event-level alerts; null for charge-level alerts.
+      - name: charge_id
+        description: Stripe charge ID associated with the alert.
+      - name: event_at
+        description: Event timestamp (or charged_at for charge-level alerts).
+      - name: amount
+        description: Dollar amount associated with the flagged row.
+      - name: description
+        description: Human-readable explanation of the issue for Finance review.

@@ -1,0 +1,16 @@
+balance_transaction_id,charge_id,event_at,charged_at,event_month,charge_month,days_since_charge,event_type,event_subtype,flow_direction,revenue_category,amount,net_amount,amount_original_currency,has_original_currency_amount,dbtenant_ids,addon_types,charge_amount,charge_status,is_currency_conversion_failed,has_multiple_addon_types,is_orphan_activity
+txn_001,ch_AAA,2024-03-10 09:00:00,2024-03-10 09:00:00,2024-03-01,2024-03-01,0,charge,charge,inflow,gross_charge,50.0,50.0,50.0,True,dbtenant_1,payments,50.0,succeeded,False,False,False
+txn_002,ch_AAA,2024-03-10 09:00:00,2024-03-10 09:00:00,2024-03-01,2024-03-01,0,transfer,connect_transfer,outflow,connect_transfer,35.0,-35.0,35.0,True,dbtenant_1,payments,50.0,succeeded,False,False,False
+txn_003,ch_AAA,2024-03-12 14:00:00,2024-03-10 09:00:00,2024-03-01,2024-03-01,2,fee,processing_fee,outflow,processing_fee,1.75,-1.75,1.75,True,dbtenant_1,payments,50.0,succeeded,False,False,False
+txn_004,ch_AAA,2024-03-15 10:00:00,2024-03-10 09:00:00,2024-03-01,2024-03-01,5,fee,interchange,outflow,interchange_fee,0.9,-0.9,0.9,True,dbtenant_1,payments,50.0,succeeded,False,False,False
+txn_005,ch_BBB,2024-03-18 11:00:00,2024-03-18 11:00:00,2024-03-01,2024-03-01,0,charge,charge,inflow,gross_charge,120.0,120.0,120.0,True,dbtenant_2,screening,120.0,succeeded,False,False,False
+txn_006,ch_BBB,2024-03-18 11:00:00,2024-03-18 11:00:00,2024-03-01,2024-03-01,0,transfer,connect_transfer,outflow,connect_transfer,90.0,-90.0,90.0,True,dbtenant_2,screening,120.0,succeeded,False,False,False
+txn_007,ch_BBB,2024-03-20 08:00:00,2024-03-18 11:00:00,2024-03-01,2024-03-01,2,fee,processing_fee,outflow,processing_fee,3.5,-3.5,3.5,True,dbtenant_2,screening,120.0,succeeded,False,False,False
+txn_008,ch_CCC,2024-03-22 16:00:00,2024-03-22 16:00:00,2024-03-01,2024-03-01,0,charge,charge,inflow,gross_charge,75.0,75.0,,False,dbtenant_3,payments,75.0,succeeded,True,False,False
+txn_009,ch_CCC,2024-03-22 16:00:00,2024-03-22 16:00:00,2024-03-01,2024-03-01,0,transfer,connect_transfer,outflow,connect_transfer,55.0,-55.0,55.0,True,dbtenant_3,payments,75.0,succeeded,False,False,False
+txn_010,ch_DDD,2024-03-25 09:30:00,2024-03-25 09:30:00,2024-03-01,2024-03-01,0,charge,charge,inflow,gross_charge,200.0,200.0,200.0,True,dbtenant_1,"screening,payments",200.0,succeeded,False,True,False
+txn_011,ch_DDD,2024-03-27 15:00:00,2024-03-25 09:30:00,2024-03-01,2024-03-01,2,transfer,connect_transfer,outflow,connect_transfer,150.0,-150.0,150.0,True,dbtenant_1,"screening,payments",200.0,succeeded,False,True,False
+txn_012,ch_DDD,2024-03-29 12:00:00,2024-03-25 09:30:00,2024-03-01,2024-03-01,4,fee,processing_fee,outflow,processing_fee,5.0,-5.0,5.0,True,dbtenant_1,"screening,payments",200.0,succeeded,False,True,False
+txn_013,ch_EEE,2024-03-26 14:00:00,2024-03-26 14:00:00,2024-03-01,2024-03-01,0,charge,charge,inflow,gross_charge,95.0,95.0,95.0,True,dbtenant_2,payments,95.0,succeeded,False,False,False
+txn_014,ch_FFF,2024-04-02 09:00:00,,2024-04-01,,,fee,dispute_fee,outflow,dispute_fee,15.0,-15.0,15.0,True,,,,,False,,True
+txn_015,ch_GGG,2024-03-28 10:00:00,,2024-03-01,,,refund,refund,outflow,refund,50.0,-50.0,50.0,True,,,,,False,,True

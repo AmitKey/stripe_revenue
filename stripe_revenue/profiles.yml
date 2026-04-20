@@ -1,0 +1,7 @@
+stripe_revenue:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: stripe_revenue.duckdb
+      threads: 1

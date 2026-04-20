@@ -1,0 +1,95 @@
+version: 2
+
+models:
+  - name: stg_stripe__charges
+    description: >
+      Thin rename of raw_stripe_charges. One row per Stripe charge (one payment from an end customer).
+      expected_transfer_amount is kept for reference only — it is set at charge creation time
+      and is less accurate than the actual transfer event that arrives later.
+    columns:
+      - name: charge_id
+        description: Stripe charge ID (primary key).
+        tests:
+          - unique
+          - not_null
+      - name: charge_amount
+        description: Gross amount collected from the end customer (USD).
+      - name: charge_status
+        description: Charge lifecycle status.
+        tests:
+          - accepted_values:
+              values: [succeeded, failed, pending, refunded, disputed]
+      - name: charged_at
+        description: Charge creation timestamp (UTC).
+        tests:
+          - not_null
+      - name: journalentry_id_at_creation
+        description: >
+          Soft join key to journal entries, populated at charge creation time.
+          May be stale; prefer joining via charge_id in downstream models.
+      - name: expected_transfer_amount
+        description: >
+          Estimated transfer amount set at charge creation. Less accurate than
+          the connect_transfer event in raw_stripe_activity. Do not use for net
+          revenue calculations.
+
+  - name: stg_stripe__activity
+    description: >
+      Cleans raw Stripe activity events. One row per balance transaction (charge, fee, transfer, refund, dispute).
+      Flow direction is re-derived from business logic — only charge events are inflows, everything else
+      is an outflow. The source field was unreliable (txn_009 was wrongly tagged as inflow).
+      Rows where currency is non-USD but original amount is null are flagged as currency conversion failures.
+    columns:
+      - name: balance_transaction_id
+        description: Unique Stripe balance-transaction ID (primary key).
+        tests:
+          - unique
+          - not_null
+      - name: charge_id
+        description: >
+          Stripe charge this event belongs to. Not all activity rows have a
+          matching charge (orphan dispute fees, orphaned refunds).
+      - name: event_at
+        description: Exact timestamp of the financial event.
+        tests:
+          - not_null
+      - name: event_type
+        description: High-level event type (charge, fee, transfer, refund, dispute, reversal).
+      - name: event_subtype
+        description: >
+          Detailed subtype (charge, processing_fee, interchange, connect_transfer,
+          dispute_fee, refund, reversal).
+      - name: flow_direction
+        description: >
+          Direction of money flow (inflow, outflow). txn_009 has been corrected
+          from the source value of inflow to outflow.
+      - name: is_currency_conversion_failed
+        description: >
+          True when currency is non-USD and amount_original_currency is null,
+          indicating the currency conversion failed. See txn_008 (ch_CCC, CAD).
+
+  - name: stg_stripe__journal_entries
+    description: >
+      Thin rename of raw_journal_entries. One row per journal entry (charge-to-addon mapping).
+      Not unique on charge_id — a single charge can map to multiple addon types
+      (e.g. ch_DDD appears twice: once for payments, once for screening).
+    columns:
+      - name: journalentry_id
+        description: Internal journal entry ID (primary key).
+        tests:
+          - unique
+          - not_null
+      - name: charge_id
+        description: >
+          Stripe charge ID. Not unique in this table — a single charge can
+          span multiple addon types.
+      - name: dbtenant_id
+        description: Internal DoorLoop tenant identifier.
+        tests:
+          - not_null
+      - name: addon_type
+        description: Addon product type.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [payments, screening]

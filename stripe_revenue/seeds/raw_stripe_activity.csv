@@ -1,0 +1,16 @@
+balance_transaction_id,charge_id,event_at,event_type,event_subtype,amount,flow_direction,currency,amount_original_currency
+txn_001,ch_AAA,2024-03-10 09:00:00,charge,charge,50.00,inflow,USD,50.00
+txn_002,ch_AAA,2024-03-10 09:00:00,transfer,connect_transfer,35.00,outflow,USD,35.00
+txn_003,ch_AAA,2024-03-12 14:00:00,fee,processing_fee,1.75,outflow,USD,1.75
+txn_004,ch_AAA,2024-03-15 10:00:00,fee,interchange,0.90,outflow,USD,0.90
+txn_005,ch_BBB,2024-03-18 11:00:00,charge,charge,120.00,inflow,USD,120.00
+txn_006,ch_BBB,2024-03-18 11:00:00,transfer,connect_transfer,90.00,outflow,USD,90.00
+txn_007,ch_BBB,2024-03-20 08:00:00,fee,processing_fee,3.50,outflow,USD,3.50
+txn_008,ch_CCC,2024-03-22 16:00:00,charge,charge,75.00,inflow,CAD,
+txn_009,ch_CCC,2024-03-22 16:00:00,transfer,connect_transfer,55.00,inflow,USD,55.00
+txn_010,ch_DDD,2024-03-25 09:30:00,charge,charge,200.00,inflow,USD,200.00
+txn_011,ch_DDD,2024-03-27 15:00:00,transfer,connect_transfer,150.00,outflow,USD,150.00
+txn_012,ch_DDD,2024-03-29 12:00:00,fee,processing_fee,5.00,outflow,USD,5.00
+txn_013,ch_EEE,2024-03-26 14:00:00,charge,charge,95.00,inflow,USD,95.00
+txn_014,ch_FFF,2024-04-02 09:00:00,fee,dispute_fee,15.00,outflow,USD,15.00
+txn_015,ch_GGG,2024-03-28 10:00:00,refund,refund,50.00,outflow,USD,50.00

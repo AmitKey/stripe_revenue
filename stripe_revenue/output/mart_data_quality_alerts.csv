@@ -1,0 +1,6 @@
+alert_type,severity,balance_transaction_id,charge_id,event_at,event_subtype,amount,addon_types,dbtenant_ids,description
+currency_conversion_failed,warning,txn_008,ch_CCC,2024-03-22 16:00:00,charge,75.0,payments,dbtenant_3,Non-USD charge with no original currency amount logged; USD conversion value may be inaccurate
+orphan_activity,warning,txn_015,ch_GGG,2024-03-28 10:00:00,refund,50.0,,,Activity event has no matching charge — tenant context unknown; may indicate a deleted charge or out-of-band Stripe event
+orphan_activity,warning,txn_014,ch_FFF,2024-04-02 09:00:00,dispute_fee,15.0,,,Activity event has no matching charge — tenant context unknown; may indicate a deleted charge or out-of-band Stripe event
+multi_addon_charge,info,,ch_DDD,2024-03-25 09:30:00,,200.0,"screening,payments",dbtenant_1,"Charge spans multiple addon types (screening,payments); per-addon revenue attribution is ambiguous"
+pending_settlement,info,,ch_EEE,2024-03-26 14:00:00,,95.0,payments,dbtenant_2,Charge collected but no connect_transfer event has arrived; current net_revenue overstates DoorLoop retention

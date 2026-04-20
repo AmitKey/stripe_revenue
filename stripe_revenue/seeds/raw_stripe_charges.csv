@@ -1,0 +1,6 @@
+charge_id,stripe_customer_id,stripe_tenant_customer_id,charge_amount,charge_status,created_at,journalentry_id,expected_transfer_amount
+ch_AAA,cus_pm_1,cus_con_1,50,succeeded,2024-03-10 09:00:00,je_001,34.5
+ch_BBB,cus_pm_2,cus_con_2,120,succeeded,2024-03-18 11:00:00,je_002,89.0
+ch_CCC,cus_pm_3,cus_con_3,75,succeeded,2024-03-22 16:00:00,je_003,54.0
+ch_DDD,cus_pm_1,cus_con_1,200,succeeded,2024-03-25 09:30:00,je_004,150.0
+ch_EEE,cus_pm_2,cus_con_2,95,succeeded,2024-03-26 14:00:00,je_006,70.0

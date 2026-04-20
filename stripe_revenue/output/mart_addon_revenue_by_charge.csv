@@ -1,0 +1,6 @@
+charge_id,charged_at,charge_month,dbtenant_ids,addon_types,charge_status,gross_charge_amount,connect_transfer_amount,processing_fee_amount,interchange_fee_amount,dispute_fee_amount,refund_amount,reversal_amount,net_revenue,net_take_rate,is_settled,days_to_first_transfer,event_count,is_original_currency_amount_missing,has_multiple_addon_types
+ch_AAA,2024-03-10 09:00:00,2024-03-01,dbtenant_1,payments,succeeded,50.0,35.0,1.75,0.9,0.0,0.0,0.0,12.35,0.247,True,0,4,False,False
+ch_DDD,2024-03-25 09:30:00,2024-03-01,dbtenant_1,"screening,payments",succeeded,200.0,150.0,5.0,0.0,0.0,0.0,0.0,45.0,0.225,True,2,3,False,True
+ch_CCC,2024-03-22 16:00:00,2024-03-01,dbtenant_3,payments,succeeded,75.0,55.0,0.0,0.0,0.0,0.0,0.0,20.0,0.26666666666666666,True,0,2,True,False
+ch_BBB,2024-03-18 11:00:00,2024-03-01,dbtenant_2,screening,succeeded,120.0,90.0,3.5,0.0,0.0,0.0,0.0,26.5,0.22083333333333333,True,0,3,False,False
+ch_EEE,2024-03-26 14:00:00,2024-03-01,dbtenant_2,payments,succeeded,95.0,0.0,0.0,0.0,0.0,0.0,0.0,95.0,1.0,False,,1,False,False

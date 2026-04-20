@@ -1,0 +1,7 @@
+journalentry_id,charge_id,dbtenant_id,addon_type
+je_001,ch_AAA,dbtenant_1,payments
+je_002,ch_BBB,dbtenant_2,screening
+je_003,ch_CCC,dbtenant_3,payments
+je_004,ch_DDD,dbtenant_1,payments
+je_005,ch_DDD,dbtenant_1,screening
+je_006,ch_EEE,dbtenant_2,payments

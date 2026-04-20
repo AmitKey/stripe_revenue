@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: int_charges_enriched
+    description: >
+      Charges joined to journal entries. One row per Stripe charge.
+      Multi-addon charges (e.g. ch_DDD) are collapsed into a single row — addon types become
+      a comma-separated string and has_multiple_addon_types is set to true.
+      Charges with no journal entry are kept via LEFT JOIN and flagged as is_unmatched_charge.
+    columns:
+      - name: charge_id
+        description: Stripe charge ID (primary key).
+        tests:
+          - unique
+          - not_null
+      - name: dbtenant_ids
+        description: Comma-separated DoorLoop tenant IDs linked to this charge.
+      - name: addon_types
+        description: Comma-separated addon types linked to this charge (payments, screening, or both).
+      - name: journal_entry_count
+        description: Number of journal entries matched to this charge.
+      - name: has_multiple_addon_types
+        description: True for charges linked to more than one addon type (e.g. ch_DDD).
+      - name: is_unmatched_charge
+        description: True for charges with no matching journal entry — tenant/addon context unknown.
+
+  - name: int_activity_classified
+    description: >
+      Every Stripe event enriched with charge context and a signed net amount. One row per balance transaction.
+      net_amount is positive for inflows and negative for outflows — summing it gives net revenue directly.
+      Events with no matching charge (ch_FFF dispute, ch_GGG refund) are kept and flagged as is_orphan_activity.
+    columns:
+      - name: balance_transaction_id
+        description: Stripe balance-transaction ID (primary key).
+        tests:
+          - unique
+          - not_null
+      - name: net_amount
+        description: >
+          Signed contribution to net revenue. Positive for inflows (charges,
+          reversals), negative for outflows (transfers, fees, refunds, disputes).
+      - name: is_orphan_activity
+        description: >
+          True when charge_id has no matching row in stg_stripe__charges.
+          Covers ch_FFF (dispute_fee) and ch_GGG (refund).
+      - name: is_currency_conversion_failed
+        description: Propagated from staging — true for txn_008 (ch_CCC, CAD).
+      - name: has_multiple_addon_types
+        description: Propagated from charges — true for ch_DDD.
