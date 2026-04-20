@@ -127,7 +127,7 @@ SELECT * FROM marts.mart_addon_revenue_monthly ORDER BY event_month;
 
 ## Known data issues
 
-All issues are surfaced in `mart_dq_summary`. A summary:
+All issues are surfaced in `mart_data_quality_alerts` 
 
 | Charge | Issue |
 |---|---|
