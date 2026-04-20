@@ -40,3 +40,4 @@ enriched as (
 )
 
 select * from enriched
+where charge_status = 'succeeded'
