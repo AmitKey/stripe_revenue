@@ -43,6 +43,7 @@ enriched as (
         dbtenant_ids,
         addon_types,
         charge_amount,
+        expected_transfer_amount,
         charge_status,
 
         -- Data quality flags

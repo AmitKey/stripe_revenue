@@ -94,10 +94,9 @@ missing_journal_entry as (
     where is_unmatched_charge
 ),
 
--- Alert 5: Pending settlement — charge collected but no connect_transfer yet
---   Affects ch_EEE. The property manager has not yet been paid out.
---   Net revenue for this charge will increase (become less positive) once
---   the transfer and fees land.
+-- Alert 5: Pending settlement — charge has no connect_transfer event yet.
+--   The property manager transfer hasn't landed; net_revenue on these charges equals gross and is overstated.
+
 pending_settlement as (
     select
         'pending_settlement'                                            as alert_type,
@@ -109,8 +108,8 @@ pending_settlement as (
         gross_charge_amount                                             as amount,
         addon_types,
         dbtenant_ids,
-        'Charge collected but no connect_transfer event has arrived; '
-        || 'current net_revenue overstates DoorLoop retention'          as description
+        'Charge has not settled yet; '
+        || 'use net_revenue_settled and net_revenue_in_flight rather than net_revenue' as description
     from charges
     where not is_settled
 ),
